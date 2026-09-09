@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>IMDB Review Sentiment Analysis</title>
+    <style>
+        body { 
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
+            max-width: 650px; 
+            margin: 40px auto; 
+            padding: 0 20px;
+            color: #333;
+        }
+        textarea { 
+            width: 100%; 
+            height: 130px; 
+            padding: 12px; 
+            box-sizing: border-box; 
+            margin-bottom: 15px; 
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 15px;
+            resize: vertical;
+        }
+        button { 
+            padding: 11px 24px; 
+            background-color: #007bff; 
+            color: white; 
+            border: none; 
+            cursor: pointer; 
+            border-radius: 5px; 
+            font-size: 15px;
+            font-weight: bold;
+            transition: background 0.2s ease;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        #result { 
+            margin-top: 22px; 
+            font-weight: bold; 
+            font-size: 1.2em; 
+            padding: 10px;
+            border-radius: 5px;
+        }
+        .nav-link { 
+            margin-bottom: 20px; 
+            display: inline-block; 
+            text-decoration: none; 
+            color: #007bff; 
+            font-weight: bold; 
+        }
+        .nav-link:hover {
+            text-decoration: underline;
+        }
+        .positive { 
+            color: #155724; 
+            background-color: #d4edda; 
+            border: 1px solid #c3e6cb;
+        }
+        .negative { 
+            color: #721c24; 
+            background-color: #f8d7da; 
+            border: 1px solid #f5c6cb;
+        }
+    </style>
+</head>
+<body>
+    <a class="nav-link" href="/data">📊 View All Saved Data</a>
+
+    <h2>IMDB Review Sentiment Classifier</h2>
+    <p>Type or paste any movie review below to predict sentiment and store the record securely.</p>
+    <textarea id="review" placeholder="Type your movie review here..."></textarea>
+    <br>
+    <button onclick="analyzeSentiment()">Analyze Sentiment</button>
+    <div id="result"></div>
+
+    <script>
+        async function analyzeSentiment() {
+            const reviewText = document.getElementById('review').value;
+            const resultDiv = document.getElementById('result');
+            
+            if (!reviewText.trim()) {
+                resultDiv.innerText = "Please enter a review.";
+                resultDiv.className = "";
+                return;
+            }
+
+            resultDiv.innerText = "Analyzing & saving to DB...";
+            resultDiv.className = "";
+
+            try {
+                const response = await fetch('/predict', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ review: reviewText })
+                });
+                
+                if (!response.ok) {
+                    throw new Error(`Server returned ${response.status}`);
+                }
+
+                const data = await response.json();
+                resultDiv.innerText = `Sentiment: ${data.sentiment} (Saved Record #${data.saved_id})`;
+                resultDiv.className = data.sentiment.toLowerCase();
+            } catch (err) {
+                resultDiv.innerText = "Error connecting to backend.";
+                resultDiv.className = "negative";
+            }
+        }
+    </script>
+</body>
+</html>

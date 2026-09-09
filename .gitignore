@@ -1,0 +1,15 @@
+# Virtual Environment
+.venv/
+env/
+venv/
+
+# Python Cache
+__pycache__/
+*.py[cod]
+
+# Local Database
+*.db
+sentiment.db
+
+# Large raw dataset (not needed for deployment inference)
+IMDB.csv

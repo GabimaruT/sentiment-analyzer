@@ -3,78 +3,219 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>IMDB Review Sentiment Analysis</title>
+    <title>IMDB Sentiment Analyzer & Database Search</title>
     <style>
-        body { 
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; 
-            max-width: 650px; 
-            margin: 40px auto; 
-            padding: 0 20px;
-            color: #333;
+        :root {
+            --primary: #007bff;
+            --primary-hover: #0056b3;
+            --bg: #f8f9fa;
+            --card-bg: #ffffff;
+            --text: #212529;
+            --pos-bg: #d4edda;
+            --pos-text: #155724;
+            --pos-border: #c3e6cb;
+            --neg-bg: #f8d7da;
+            --neg-text: #721c24;
+            --neg-border: #f5c6cb;
         }
+        * { box-sizing: border-box; }
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, sans-serif; 
+            max-width: 750px; 
+            margin: 35px auto; 
+            padding: 0 20px;
+            background-color: var(--bg);
+            color: var(--text);
+        }
+        .card {
+            background: var(--card-bg);
+            padding: 26px 30px;
+            border-radius: 12px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.06);
+            margin-bottom: 25px;
+        }
+        .header-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 14px;
+            border-bottom: 1px solid #e9ecef;
+        }
+        .quick-nav {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            padding: 6px 12px;
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            border-radius: 6px;
+            transition: all 0.2s ease;
+        }
+        .nav-btn-all {
+            background: #e7f1ff;
+            color: var(--primary-hover);
+            border: 1px solid #b8daff;
+        }
+        .nav-btn-all:hover { background: #cfe2ff; }
+        .nav-btn-pos {
+            background: var(--pos-bg);
+            color: var(--pos-text);
+            border: 1px solid var(--pos-border);
+        }
+        .nav-btn-pos:hover { background: #c3e6cb; }
+        .nav-btn-neg {
+            background: var(--neg-bg);
+            color: var(--neg-text);
+            border: 1px solid var(--neg-border);
+        }
+        .nav-btn-neg:hover { background: #f5c6cb; }
+
+        h2 { margin: 0 0 8px 0; font-size: 24px; color: #1a1a1a; }
+        p.subtitle { margin: 0 0 16px 0; color: #6c757d; font-size: 14px; }
+        
         textarea { 
             width: 100%; 
-            height: 130px; 
+            height: 120px; 
             padding: 12px; 
-            box-sizing: border-box; 
             margin-bottom: 15px; 
-            border: 1px solid #ccc;
-            border-radius: 6px;
+            border: 1px solid #ced4da;
+            border-radius: 8px;
             font-size: 15px;
+            font-family: inherit;
             resize: vertical;
         }
-        button { 
-            padding: 11px 24px; 
-            background-color: #007bff; 
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.15);
+        }
+        button.btn-primary { 
+            padding: 12px 26px; 
+            background-color: var(--primary); 
             color: white; 
             border: none; 
             cursor: pointer; 
-            border-radius: 5px; 
-            font-size: 15px;
-            font-weight: bold;
+            border-radius: 6px; 
+            font-size: 15px; 
+            font-weight: 600;
             transition: background 0.2s ease;
         }
-        button:hover {
-            background-color: #0056b3;
+        button.btn-primary:hover { 
+            background-color: var(--primary-hover); 
         }
         #result { 
-            margin-top: 22px; 
-            font-weight: bold; 
-            font-size: 1.2em; 
-            padding: 10px;
-            border-radius: 5px;
-        }
-        .nav-link { 
-            margin-bottom: 20px; 
-            display: inline-block; 
-            text-decoration: none; 
-            color: #007bff; 
-            font-weight: bold; 
-        }
-        .nav-link:hover {
-            text-decoration: underline;
+            margin-top: 18px; 
+            font-weight: 600; 
+            font-size: 1.1em; 
+            padding: 12px 16px;
+            border-radius: 8px;
+            display: none;
         }
         .positive { 
-            color: #155724; 
-            background-color: #d4edda; 
-            border: 1px solid #c3e6cb;
+            display: block !important;
+            color: var(--pos-text); 
+            background-color: var(--pos-bg); 
+            border: 1px solid var(--pos-border);
         }
         .negative { 
-            color: #721c24; 
-            background-color: #f8d7da; 
-            border: 1px solid #f5c6cb;
+            display: block !important;
+            color: var(--neg-text); 
+            background-color: var(--neg-bg); 
+            border: 1px solid var(--neg-border);
+        }
+
+        /* Database Search Widget */
+        .search-section {
+            border-top: 1px solid #e9ecef;
+            margin-top: 24px;
+            padding-top: 20px;
+        }
+        .search-title {
+            font-size: 16px;
+            font-weight: 700;
+            margin-bottom: 12px;
+            color: #343a40;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .search-form-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+        .search-input {
+            flex: 1;
+            min-width: 200px;
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+        .search-select {
+            padding: 8px 12px;
+            border: 1px solid #ced4da;
+            border-radius: 6px;
+            font-size: 14px;
+            background: white;
+        }
+        .search-btn {
+            padding: 8px 16px;
+            background-color: #28a745;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .search-btn:hover {
+            background-color: #218838;
         }
     </style>
 </head>
 <body>
-    <a class="nav-link" href="/data">📊 View All Saved Data</a>
+    <div class="card">
+        <div class="header-bar">
+            <span style="font-size: 13px; font-weight: 700; color: #495057;">📊 DATABASE SEARCH & EXPLORER:</span>
+            <div class="quick-nav">
+                <a class="nav-btn nav-btn-all" href="/data">📋 All Records</a>
+                <a class="nav-btn nav-btn-pos" href="/data?sentiment=positive">👍 Positive Reviews</a>
+                <a class="nav-btn nav-btn-neg" href="/data?sentiment=negative">👎 Negative Reviews</a>
+            </div>
+        </div>
 
-    <h2>IMDB Review Sentiment Classifier</h2>
-    <p>Type or paste any movie review below to predict sentiment and store the record securely.</p>
-    <textarea id="review" placeholder="Type your movie review here..."></textarea>
-    <br>
-    <button onclick="analyzeSentiment()">Analyze Sentiment</button>
-    <div id="result"></div>
+        <h2>🎬 IMDB Sentiment Classifier</h2>
+        <p class="subtitle">Type or paste any movie review below to predict sentiment and save it securely in the SQLite database.</p>
+        
+        <textarea id="review" placeholder="Type your movie review here (e.g., 'An absolute cinematic masterpiece with outstanding acting!')..."></textarea>
+        <button class="btn-primary" onclick="analyzeSentiment()">Analyze Sentiment</button>
+        <div id="result"></div>
+
+        <!-- Inline Database Quick Search Form -->
+        <div class="search-section">
+            <div class="search-title">
+                <span>🔎 Search Database Reviews</span>
+                <a href="/docs" target="_blank" style="font-size: 13px; font-weight: normal; color: var(--primary); text-decoration: none;">API Docs &rarr;</a>
+            </div>
+            <form class="search-form-row" method="GET" action="/data">
+                <input class="search-input" type="text" name="q" placeholder="Keyword (e.g., 'great', 'boring', 'acting')...">
+                <select class="search-select" name="sentiment">
+                    <option value="">All Sentiments</option>
+                    <option value="positive">Positive Reviews Only</option>
+                    <option value="negative">Negative Reviews Only</option>
+                </select>
+                <button class="search-btn" type="submit">Search Database</button>
+            </form>
+        </div>
+    </div>
 
     <script>
         async function analyzeSentiment() {
@@ -83,12 +224,13 @@
             
             if (!reviewText.trim()) {
                 resultDiv.innerText = "Please enter a review.";
-                resultDiv.className = "";
+                resultDiv.className = "negative";
                 return;
             }
 
             resultDiv.innerText = "Analyzing & saving to DB...";
             resultDiv.className = "";
+            resultDiv.style.display = "block";
 
             try {
                 const response = await fetch('/predict', {

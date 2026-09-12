@@ -11,7 +11,8 @@ A modern, full-stack Natural Language Processing (NLP) web application that clas
 - **FastAPI Backend**: Asynchronous, high-performance REST API with automatic interactive documentation via Swagger UI (`/docs`).
 - **Interactive Web Interface**: Clean, responsive frontend with real-time feedback and dynamic sentiment badge styling.
 - **Database History Tracking**: Automatically persists submitted reviews, predictions, and timestamps to an SQLite database (`sentiment.db`).
-- **Data Inspection Table**: Built-in `/data` route to view historical review records, protected against Cross-Site Scripting (XSS).
+- **Database Search & Sentiment Filtering**: Search positive and negative reviews directly using keyword queries and sentiment filters from both the web UI (`/data`) and REST API (`/api/reviews`).
+- **XSS & Injection Protection**: HTML escaping and parameterized SQL queries protect stored records against vulnerabilities.
 - **Cloud-Ready**: Includes `render.yaml` configuration for seamless one-click deployment on Render.
 
 ---
@@ -89,31 +90,34 @@ The application will be running at: **`http://localhost:8000`**
 
 ## 📡 API Endpoints
 
-| Method | Endpoint | Description |
-| :--- | :--- | :--- |
-| `GET` | `/` | Web interface for analyzing movie reviews |
-| `POST` | `/predict` | Predict sentiment and save record into SQLite DB |
-| `GET` | `/data` | View logged reviews and predictions in a tabular format |
-| `GET` | `/docs` | Interactive Swagger API documentation |
-| `GET` | `/redoc` | Alternative ReDoc API documentation |
+| Method | Endpoint | Description | Query Parameters |
+| :--- | :--- | :--- | :--- |
+| `GET` | `/` | Web interface with analyzer and quick DB search | - |
+| `POST` | `/predict` | Predict sentiment and save record into SQLite DB | - |
+| `GET` | `/data` | Interactive Web UI to search & filter database records | `sentiment` (`positive`/`negative`), `q` (keyword) |
+| `GET` | `/api/reviews` | JSON API endpoint to search stored reviews | `sentiment` (`positive`/`negative`), `q` (keyword), `limit` |
+| `GET` | `/docs` | Interactive Swagger API documentation | - |
+| `GET` | `/redoc` | Alternative ReDoc API documentation | - |
 
-### Example API Request (`/predict`)
+---
 
-**Request:**
+### 🔍 Search Examples
+
+#### 1. Filter Positive Reviews (JSON API)
 ```bash
-curl -X POST "http://localhost:8000/predict" \
-     -H "Content-Type: application/json" \
-     -d '{"review": "An absolute masterpiece with phenomenal acting and direction!"}'
+curl "http://localhost:8000/api/reviews?sentiment=positive"
 ```
 
-**Response:**
-```json
-{
-  "sentiment": "Positive",
-  "code": 1,
-  "saved_id": 1
-}
+#### 2. Filter Negative Reviews with Keyword Search (JSON API)
+```bash
+curl "http://localhost:8000/api/reviews?sentiment=negative&q=boring"
 ```
+
+#### 3. Web UI Filtering
+- **All Reviews:** `http://localhost:8000/data`
+- **Positive Only:** `http://localhost:8000/data?sentiment=positive`
+- **Negative Only:** `http://localhost:8000/data?sentiment=negative`
+- **Keyword + Sentiment Search:** `http://localhost:8000/data?sentiment=positive&q=masterpiece`
 
 ---
 
